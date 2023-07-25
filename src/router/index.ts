@@ -219,6 +219,28 @@ export const constantRoutes: RouteRecordRaw[] = [
         }
       }
     ]
+  },
+  {
+    path: "/devextreme-demo",
+    component: Layouts,
+    redirect: "/devextreme-demo/demo1",
+    name: "DevExtremeDemo",
+    meta: {
+      title: "devextreme 示例",
+      elIcon: "Menu",
+      alwaysShow: true
+    },
+    children: [
+      {
+        path: "demo1",
+        component: () => import("@/views/devextreme-demo/demo1.vue"),
+        name: "Demo1",
+        meta: {
+          title: "示例 1",
+          keepAlive: true
+        }
+      }
+    ]
   }
 ]
 

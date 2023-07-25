@@ -16,6 +16,11 @@ export function loginApi(data: Login.LoginRequestData) {
     method: "post",
     data
   })
+  // return {
+  //   coede: 0,
+  //   data: { token: "xxx" },
+  //   message: "登录成功"
+  // }
 }
 
 /** 获取用户详情 */
@@ -24,4 +29,12 @@ export function getUserInfoApi() {
     url: "users/info",
     method: "get"
   })
+  // return {
+  //   code: 0,
+  //   data: {
+  //     username: "xxx",
+  //     roles: []
+  //   },
+  //   message: "获取用户详情成功"
+  // }
 }
