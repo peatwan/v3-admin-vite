@@ -3,7 +3,14 @@
     <div class="search-wrapper">
       <DxTextBox v-model="searchData.username" :max-length="40" styling-mode="outlined" label="用户名" />
       <DxTextBox v-model="searchData.phone" :max-length="40" styling-mode="outlined" label="手机号" />
-      <DxButton class="action-button" text="查询" styling-mode="contained" type="default" icon="search" />
+      <DxButton
+        class="action-button"
+        text="查询"
+        styling-mode="contained"
+        type="default"
+        icon="search"
+        @click="handleSearch"
+      />
       <DxButton
         class="action-button"
         text="重置"
@@ -16,12 +23,8 @@
     <div class="data-grid-wrapper">
       <div class="toolbar-wrapper">
         <div class="buttons">
-          <DxButton text="新增用户" styling-mode="contained" type="default" icon="add" />
+          <DxButton text="新增用户" styling-mode="contained" type="default" icon="add" @click="dialogVisible = true" />
           <DxButton text="批量删除" styling-mode="contained" type="danger" icon="trash" />
-        </div>
-        <div class="buttons">
-          <DxButton styling-mode="contained" icon="download" />
-          <DxButton styling-mode="contained" icon="refresh" />
         </div>
       </div>
       <div class="table-wrapper">
@@ -33,33 +36,41 @@
           :columnAutoWidth="true"
           :showRowLines="true"
           :showColumnLines="false"
+          @exporting="onExporting"
         >
           <DxHeaderFilter :visible="true" />
-          <DxColumn data-field="username" caption="用户名" />
-          <DxColumn data-field="roles" caption="角色" cell-template="role-cell" />
+          <DxColumn data-field="username" caption="用户名" alignment="center" />
+          <DxColumn data-field="roles" caption="角色" cell-template="role-cell" alignment="center" />
           <template #role-cell="{ data }">
             <el-tag v-if="data.data.roles === 'admin'" effect="plain">admin</el-tag>
             <el-tag v-else type="warning" effect="plain">{{ data.data.roles }}</el-tag>
           </template>
 
-          <DxColumn data-field="phone" caption="手机号" />
-          <DxColumn data-field="email" caption="邮箱" />
-          <DxColumn data-field="status" caption="状态" cell-template="status-cell" />
+          <DxColumn data-field="phone" caption="手机号" alignment="center" />
+          <DxColumn data-field="email" caption="邮箱" alignment="center" />
+          <DxColumn data-field="status" caption="状态" cell-template="status-cell" alignment="center" />
           <template #status-cell="{ data }">
             <el-tag v-if="data.data.status" type="success" effect="plain">启用</el-tag>
             <el-tag v-else type="danger" effect="plain">禁用</el-tag>
           </template>
-          <DxColumn data-field="createTime" caption="创建时间" />
-          <DxColumn caption="操作" cell-template="action-cell" />
+          <DxColumn data-field="createTime" caption="创建时间" alignment="center" />
+          <DxColumn caption="操作" cell-template="action-cell" alignment="center" />
           <template #action-cell="{ data }">
             <el-button type="primary" text bg size="small" @click="handleUpdate(data.data)">修改</el-button>
             <el-button type="danger" text bg size="small" @click="handleDelete(data.data)">删除</el-button>
           </template>
+          <DxColumnChooser :enabled="true" mode="select">
+            <DxPosition my="right top" at="right bottom" of=".dx-datagrid-column-chooser-button" />
+
+            <DxColumnChooserSearch :enabled="true" />
+            <DxColumnChooserSelection :allow-select-all="true" />
+          </DxColumnChooser>
 
           <DxGroupPanel :visible="true" />
           <DxGrouping />
           <DxSearchPanel :visible="true" />
           <DxSelection mode="multiple" />
+          <DxExport :enabled="true" :allow-export-selected-data="true" />
         </DxDataGrid>
       </div>
       <div class="pager-wrapper">
@@ -112,11 +123,19 @@ import {
   DxGroupPanel,
   DxSearchPanel,
   DxSelection,
-  DxHeaderFilter
+  DxHeaderFilter,
+  DxExport,
+  DxColumnChooser,
+  DxColumnChooserSearch,
+  DxColumnChooserSelection
 } from "devextreme-vue/data-grid"
 import DxTextBox from "devextreme-vue/text-box"
 import DxButton from "devextreme-vue/button"
-
+import { Workbook } from "exceljs"
+import { saveAs } from "file-saver"
+// Our demo infrastructure requires us to use 'file-saver-es'.
+// We recommend that you use the official 'file-saver' package in your applications.
+import { exportDataGrid } from "devextreme/excel_exporter"
 defineOptions({
   // 命名当前组件
   name: "DevExtremeTable"
@@ -236,6 +255,22 @@ const resetSearch = () => {
 
 /** 监听分页参数的变化 */
 watch([() => paginationData.currentPage, () => paginationData.pageSize], getTableData, { immediate: true })
+
+const onExporting = (e) => {
+  const workbook = new Workbook()
+  const worksheet = workbook.addWorksheet("Employees")
+
+  exportDataGrid({
+    component: e.component,
+    worksheet,
+    autoFilterEnabled: true
+  }).then(() => {
+    workbook.xlsx.writeBuffer().then((buffer) => {
+      saveAs(new Blob([buffer], { type: "application/octet-stream" }), "DataGrid.xlsx")
+    })
+  })
+  e.cancel = true
+}
 </script>
 
 <style lang="scss" scoped>

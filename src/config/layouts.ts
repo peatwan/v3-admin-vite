@@ -28,7 +28,7 @@ export interface LayoutSettings {
 
 export const layoutSettings: LayoutSettings = getConfigLayout() ?? {
   layoutMode: "left",
-  showSettings: true,
+  showSettings: false,
   showTagsView: true,
   fixedHeader: true,
   showLogo: true,
