@@ -37,5 +37,9 @@ export function usePagination(initialPaginationData: PaginationData = {}) {
     paginationData.pageSize = value
   }
 
-  return { paginationData, handleCurrentChange, handleSizeChange }
+  const nextPage = () => {
+    paginationData.currentPage++
+  }
+
+  return { paginationData, handleCurrentChange, handleSizeChange, nextPage }
 }

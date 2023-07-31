@@ -32,3 +32,16 @@ export const resetConfigLayout = () => {
   removeConfigLayout()
   location.reload()
 }
+
+export const throttle = (func: Function, delay = 100) => {
+  let timer: any = null
+  return function () {
+    if (timer) {
+      return
+    }
+    timer = setTimeout(function () {
+      func.apply(null)
+      timer = null
+    }, delay)
+  }
+}

@@ -29,14 +29,18 @@
       </div>
       <div class="table-wrapper">
         <DxDataGrid
+          id="gridContainer"
+          ref="gridContainer"
           :allow-column-reordering="true"
-          :data-source="tableData"
-          key-expr="id"
+          :data-source="dataSource"
+          key-expr="_index"
           :show-borders="false"
-          :columnAutoWidth="true"
+          :columnAutoWidth="false"
           :showRowLines="true"
           :showColumnLines="false"
+          column-resizing-mode="widget"
           @exporting="onExporting"
+          @content-ready="onContentReady"
         >
           <DxHeaderFilter :visible="true" />
           <DxColumn data-field="username" caption="用户名" alignment="center" />
@@ -71,9 +75,10 @@
           <DxSearchPanel :visible="true" />
           <DxSelection mode="multiple" />
           <DxExport :enabled="true" :allow-export-selected-data="true" />
+          <DxScrolling mode="virtual" :render-async="false" />
         </DxDataGrid>
       </div>
-      <div class="pager-wrapper">
+      <!-- <div class="pager-wrapper">
         <el-pagination
           background
           :layout="paginationData.layout"
@@ -84,7 +89,7 @@
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
         />
-      </div>
+      </div> -->
     </div>
     <!-- 新增/修改 -->
     <el-dialog
@@ -110,8 +115,8 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref, watch } from "vue"
-import { createTableDataApi, deleteTableDataApi, updateTableDataApi, getTableDataApi } from "@/api/table"
+import { reactive, ref, watch, computed, onActivated, onBeforeUnmount } from "vue"
+import { createTableDataApi, deleteTableDataApi, updateTableDataApi, getTableDataApi } from "@/api/table/"
 import { type GetTableData } from "@/api/table/types/table"
 import { usePagination } from "@/hooks/usePagination"
 import { type FormInstance, type FormRules, ElMessage, ElMessageBox } from "element-plus"
@@ -127,7 +132,9 @@ import {
   DxExport,
   DxColumnChooser,
   DxColumnChooserSearch,
-  DxColumnChooserSelection
+  DxColumnChooserSelection,
+  DxPosition,
+  DxScrolling
 } from "devextreme-vue/data-grid"
 import DxTextBox from "devextreme-vue/text-box"
 import DxButton from "devextreme-vue/button"
@@ -136,13 +143,18 @@ import { saveAs } from "file-saver"
 // Our demo infrastructure requires us to use 'file-saver-es'.
 // We recommend that you use the official 'file-saver' package in your applications.
 import { exportDataGrid } from "devextreme/excel_exporter"
+import ArrayStore from "devextreme/data/array_store"
+import DataSource from "devextreme/data/data_source"
+import dxDataGrid from "devextreme/ui/data_grid"
+import { throttle } from "@/utils/index"
+
 defineOptions({
   // 命名当前组件
   name: "DevExtremeTable"
 })
 
 const loading = ref<boolean>(false)
-const { paginationData, handleCurrentChange, handleSizeChange } = usePagination()
+const { paginationData, nextPage } = usePagination({ pageSize: 20 })
 
 //#region 增
 const dialogVisible = ref<boolean>(false)
@@ -223,6 +235,19 @@ const searchData = reactive({
   username: "",
   phone: ""
 })
+const store = ref<ArrayStore>()
+let index = 1
+const pageQueryEnabled = true
+let scrollEventIsSet = false
+const lastPage = false
+const dataSource = ref<DataSource>()
+const gridContainer = ref(DxDataGrid)
+
+// 一个计算属性 ref
+const dxGrid = computed<dxDataGrid>(() => {
+  return gridContainer.value?.instance
+})
+
 const getTableData = () => {
   loading.value = true
   getTableDataApi({
@@ -234,6 +259,7 @@ const getTableData = () => {
     .then((res) => {
       paginationData.total = res.data.total
       tableData.value = res.data.list
+      pushData(res.data.list)
     })
     .catch(() => {
       tableData.value = []
@@ -243,6 +269,7 @@ const getTableData = () => {
     })
 }
 const handleSearch = () => {
+  clearData()
   paginationData.currentPage === 1 ? getTableData() : (paginationData.currentPage = 1)
 }
 const resetSearch = () => {
@@ -251,12 +278,83 @@ const resetSearch = () => {
   handleSearch()
 }
 
+const pushData = (arr: Array<any>) => {
+  if (!(store.value instanceof ArrayStore)) {
+    initDataSource(arr)
+  } else {
+    const tmpDataArr: Array<{
+      type: "insert" | "update" | "remove"
+      data?: any
+    }> = []
+    for (const i in arr) {
+      arr[i]._index = index
+      index++
+      tmpDataArr.push({ type: "insert", data: arr[i] })
+    }
+    store.value.push(tmpDataArr)
+  }
+}
+
+const initDataSource = (arr: Array<any>) => {
+  const tmpDataArr: Array<any> = []
+  for (const i in arr) {
+    arr[i]._index = index
+    index++
+    tmpDataArr.push(arr[i])
+  }
+  store.value = new ArrayStore({
+    key: "_index",
+    data: tmpDataArr
+  })
+
+  dataSource.value = new DataSource({
+    store: store.value,
+    reshapeOnPush: pageQueryEnabled
+  })
+}
+
+const onContentReady = () => {
+  if (pageQueryEnabled && !scrollEventIsSet) {
+    const scrollView = dxGrid.value?.getScrollable()
+    if (scrollView) {
+      scrollView.on("scroll", handleScroll)
+      scrollEventIsSet = true
+    }
+  }
+}
+
+const handleScroll = (e: any) => {
+  if (pageQueryEnabled && e.reachedBottom) {
+    if (lastPage || loading.value) {
+      console.log("scroll return ")
+      return
+    }
+    throttle(nextPage)()
+  }
+}
+
+const clearData = () => {
+  if (store.value instanceof ArrayStore) {
+    store.value.clear()
+  }
+  store.value = undefined
+}
+
+onActivated(() => {
+  // 调用时机为首次挂载
+  // 以及每次从缓存中被重新插入时
+  dxGrid.value.refresh()
+})
+
+onBeforeUnmount(() => {
+  clearData()
+})
 //#endregion
 
 /** 监听分页参数的变化 */
 watch([() => paginationData.currentPage, () => paginationData.pageSize], getTableData, { immediate: true })
 
-const onExporting = (e) => {
+const onExporting = (e: any) => {
   const workbook = new Workbook()
   const worksheet = workbook.addWorksheet("Employees")
 
@@ -322,5 +420,8 @@ const onExporting = (e) => {
     display: flex;
     justify-content: flex-end;
   }
+}
+#gridContainer {
+  height: 620px;
 }
 </style>
