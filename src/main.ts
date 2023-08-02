@@ -17,7 +17,7 @@ import "vxe-table/lib/style.css"
 import "vxe-table-plugin-element/dist/style.css"
 import "@/styles/index.scss"
 //devextreme
-import "@/styles/dx.generic.custom-scheme.css"
+import "@/styles/dev-extreme/dx.generic.custom-scheme.css"
 
 const app = createApp(App)
 

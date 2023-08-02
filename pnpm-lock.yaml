@@ -1,9 +1,5 @@
 lockfileVersion: '6.0'
 
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
-
 dependencies:
   '@element-plus/icons-vue':
     specifier: 2.1.0
@@ -70,6 +66,9 @@ dependencies:
     version: 3.5.11
 
 devDependencies:
+  '@types/file-saver':
+    specifier: 2.0.5
+    version: 2.0.5
   '@types/js-cookie':
     specifier: 3.0.3
     version: 3.0.3
@@ -919,6 +918,10 @@ packages:
 
   /@types/estree@1.0.1:
     resolution: {integrity: sha512-LG4opVs2ANWZ1TJoKc937iMmNstM/d0ae1vNbnBvBhqCSezgVUOzcLCqbI5elV8Vy6WKwKjaqR+zO9VKirBBCA==}
+    dev: true
+
+  /@types/file-saver@2.0.5:
+    resolution: {integrity: sha512-zv9kNf3keYegP5oThGLaPk8E081DFDuwfqjtiTzm6PoxChdJ1raSuADf2YGCVIyrSynLrgc8JWv296s7Q7pQSQ==}
     dev: true
 
   /@types/js-cookie@3.0.3:
@@ -6309,3 +6312,7 @@ packages:
       y18n: registry.npmmirror.com/y18n@5.0.8
       yargs-parser: registry.npmmirror.com/yargs-parser@21.1.1
     dev: false
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
