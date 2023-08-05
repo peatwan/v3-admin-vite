@@ -83,8 +83,7 @@ export default (configEnv: ConfigEnv): UserConfigExport => {
       viteMockServe({
         // default
         mockPath: "mock",
-        localEnabled: true,
-        prodEnabled: false
+        localEnabled: true
       })
     ],
     /** Vitest 单元测试配置：https://cn.vitest.dev/config */
