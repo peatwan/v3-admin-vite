@@ -29,7 +29,7 @@
       </div>
       <div class="table-wrapper">
         <DxDataGrid
-          id="gridContainer"
+          class="dx-data-grid-containner"
           ref="gridContainer"
           :allow-column-reordering="true"
           :data-source="dataSource"
@@ -77,18 +77,6 @@
           <DxScrolling mode="virtual" :render-async="false" />
         </DxDataGrid>
       </div>
-      <!-- <div class="pager-wrapper">
-        <el-pagination
-          background
-          :layout="paginationData.layout"
-          :page-sizes="paginationData.pageSizes"
-          :total="paginationData.total"
-          :page-size="paginationData.pageSize"
-          :currentPage="paginationData.currentPage"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
-      </div> -->
     </div>
     <!-- 新增/修改 -->
     <el-dialog
@@ -114,10 +102,9 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref, watch, computed, onActivated, onBeforeUnmount } from "vue"
+import { reactive, ref, watch, onActivated, onBeforeUnmount } from "vue"
 import { createTableDataApi, deleteTableDataApi, updateTableDataApi, getTableDataApi } from "@/api/table/"
 import { type GetTableData } from "@/api/table/types/table"
-import { usePagination } from "@/hooks/usePagination"
 import { type FormInstance, type FormRules, ElMessage, ElMessageBox } from "element-plus"
 
 import {
@@ -142,10 +129,7 @@ import { saveAs } from "file-saver"
 // Our demo infrastructure requires us to use 'file-saver-es'.
 // We recommend that you use the official 'file-saver' package in your applications.
 import { exportDataGrid } from "devextreme/excel_exporter"
-import ArrayStore from "devextreme/data/array_store"
-import DataSource from "devextreme/data/data_source"
-import dxDataGrid from "devextreme/ui/data_grid"
-import { throttle } from "lodash-es"
+import { useDataGrid } from "@/hooks/usePaginationDataGrid"
 
 defineOptions({
   // 命名当前组件
@@ -153,7 +137,8 @@ defineOptions({
 })
 
 const loading = ref<boolean>(false)
-const { paginationData, nextPage } = usePagination({ pageSize: 20 })
+
+const { paginationData, dataSource, gridContainer, pushData, clearData, onContentReady } = useDataGrid()
 
 //#region 增
 const dialogVisible = ref<boolean>(false)
@@ -228,23 +213,9 @@ const handleUpdate = (row: GetTableData) => {
 //#endregion
 
 //#region 查
-// const tableData = ref<GetTableData[]>([])
-// const searchFormRef = ref<FormInstance | null>(null)
 const searchData = reactive({
   username: "",
   phone: ""
-})
-let store: ArrayStore | null
-let index = 1
-const pageQueryEnabled = true
-let scrollEventIsSet = false
-const lastPage = false
-const dataSource = ref<DataSource>()
-const gridContainer = ref(DxDataGrid)
-
-// 一个计算属性 ref
-const dxGrid = computed<dxDataGrid>(() => {
-  return gridContainer.value?.instance
 })
 
 const getTableData = () => {
@@ -256,13 +227,9 @@ const getTableData = () => {
     phone: searchData.phone || undefined
   })
     .then((res) => {
-      paginationData.total = res.data.total
-      // tableData.value = res.data.list
       pushData(res.data.list)
     })
-    .catch(() => {
-      // tableData.value = []
-    })
+    .catch(() => {})
     .finally(() => {
       loading.value = false
     })
@@ -277,71 +244,10 @@ const resetSearch = () => {
   handleSearch()
 }
 
-const pushData = (arr: Array<any>) => {
-  if (!(store instanceof ArrayStore)) {
-    initDataSource(arr)
-  } else {
-    const tmpDataArr: Array<{
-      type: "insert" | "update" | "remove"
-      data?: any
-    }> = []
-    for (const i in arr) {
-      arr[i]._index = index
-      index++
-      tmpDataArr.push({ type: "insert", data: arr[i] })
-    }
-    store.push(tmpDataArr)
-  }
-}
-
-const initDataSource = (arr: Array<any>) => {
-  const tmpDataArr: Array<any> = []
-  for (const i in arr) {
-    arr[i]._index = index
-    index++
-    tmpDataArr.push(arr[i])
-  }
-  store = new ArrayStore({
-    key: "_index",
-    data: tmpDataArr
-  })
-
-  dataSource.value = new DataSource({
-    store: store,
-    reshapeOnPush: pageQueryEnabled
-  })
-}
-
-const onContentReady = () => {
-  if (pageQueryEnabled && !scrollEventIsSet) {
-    const scrollView = dxGrid.value?.getScrollable()
-    if (scrollView) {
-      scrollView.on("scroll", throttle(handleScroll, 100))
-      scrollEventIsSet = true
-    }
-  }
-}
-
-const handleScroll = (e: any) => {
-  if (pageQueryEnabled && e.reachedBottom) {
-    if (lastPage || loading.value) {
-      return
-    }
-    nextPage()
-  }
-}
-
-const clearData = () => {
-  if (store instanceof ArrayStore) {
-    store.clear()
-  }
-  store = null
-}
-
 onActivated(() => {
   // 调用时机为首次挂载
   // 以及每次从缓存中被重新插入时
-  dxGrid.value.refresh()
+  gridContainer.value?.instance?.refresh()
 })
 
 onBeforeUnmount(() => {
@@ -413,13 +319,16 @@ const onExporting = (e: any) => {
   }
   .table-wrapper {
     margin-bottom: 20px;
+    .dx-data-grid-containner {
+      height: 620px;
+    }
   }
   .pager-wrapper {
     display: flex;
     justify-content: flex-end;
   }
 }
-#gridContainer {
-  height: 620px;
-}
+// #gridContainer {
+//   height: 620px;
+// }
 </style>
