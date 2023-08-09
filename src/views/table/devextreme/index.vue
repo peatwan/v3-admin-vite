@@ -33,7 +33,6 @@
           ref="gridContainer"
           :allow-column-reordering="true"
           :data-source="dataSource"
-          key-expr="_index"
           :show-borders="false"
           :columnAutoWidth="false"
           :showRowLines="true"
@@ -146,7 +145,7 @@ import { exportDataGrid } from "devextreme/excel_exporter"
 import ArrayStore from "devextreme/data/array_store"
 import DataSource from "devextreme/data/data_source"
 import dxDataGrid from "devextreme/ui/data_grid"
-import { throttle } from "@/utils/index"
+import { throttle } from "lodash-es"
 
 defineOptions({
   // 命名当前组件
@@ -229,13 +228,13 @@ const handleUpdate = (row: GetTableData) => {
 //#endregion
 
 //#region 查
-const tableData = ref<GetTableData[]>([])
+// const tableData = ref<GetTableData[]>([])
 // const searchFormRef = ref<FormInstance | null>(null)
 const searchData = reactive({
   username: "",
   phone: ""
 })
-const store = ref<ArrayStore>()
+let store: ArrayStore | null
 let index = 1
 const pageQueryEnabled = true
 let scrollEventIsSet = false
@@ -258,11 +257,11 @@ const getTableData = () => {
   })
     .then((res) => {
       paginationData.total = res.data.total
-      tableData.value = res.data.list
+      // tableData.value = res.data.list
       pushData(res.data.list)
     })
     .catch(() => {
-      tableData.value = []
+      // tableData.value = []
     })
     .finally(() => {
       loading.value = false
@@ -279,7 +278,7 @@ const resetSearch = () => {
 }
 
 const pushData = (arr: Array<any>) => {
-  if (!(store.value instanceof ArrayStore)) {
+  if (!(store instanceof ArrayStore)) {
     initDataSource(arr)
   } else {
     const tmpDataArr: Array<{
@@ -291,7 +290,7 @@ const pushData = (arr: Array<any>) => {
       index++
       tmpDataArr.push({ type: "insert", data: arr[i] })
     }
-    store.value.push(tmpDataArr)
+    store.push(tmpDataArr)
   }
 }
 
@@ -302,13 +301,13 @@ const initDataSource = (arr: Array<any>) => {
     index++
     tmpDataArr.push(arr[i])
   }
-  store.value = new ArrayStore({
+  store = new ArrayStore({
     key: "_index",
     data: tmpDataArr
   })
 
   dataSource.value = new DataSource({
-    store: store.value,
+    store: store,
     reshapeOnPush: pageQueryEnabled
   })
 }
@@ -317,7 +316,7 @@ const onContentReady = () => {
   if (pageQueryEnabled && !scrollEventIsSet) {
     const scrollView = dxGrid.value?.getScrollable()
     if (scrollView) {
-      scrollView.on("scroll", handleScroll)
+      scrollView.on("scroll", throttle(handleScroll, 100))
       scrollEventIsSet = true
     }
   }
@@ -326,18 +325,17 @@ const onContentReady = () => {
 const handleScroll = (e: any) => {
   if (pageQueryEnabled && e.reachedBottom) {
     if (lastPage || loading.value) {
-      console.log("scroll return ")
       return
     }
-    throttle(nextPage)()
+    nextPage()
   }
 }
 
 const clearData = () => {
-  if (store.value instanceof ArrayStore) {
-    store.value.clear()
+  if (store instanceof ArrayStore) {
+    store.clear()
   }
-  store.value = undefined
+  store = null
 }
 
 onActivated(() => {
