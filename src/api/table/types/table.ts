@@ -20,7 +20,12 @@ export interface GetTableRequestData {
   phone?: string
 }
 
-export interface GetTableData {
+export interface PaginationTableData {
+  /** 分页数据的 key */
+  _key?: number
+}
+
+export interface GetTableData extends PaginationTableData {
   createTime: string
   email: string
   id: string

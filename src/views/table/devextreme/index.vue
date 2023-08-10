@@ -9,6 +9,7 @@
         styling-mode="contained"
         type="default"
         icon="search"
+        :disabled="loading"
         @click="handleSearch"
       />
       <DxButton
@@ -17,6 +18,7 @@
         styling-mode="contained"
         type="normal"
         icon="revert"
+        :disabled="loading"
         @click="resetSearch"
       />
     </div>
@@ -24,7 +26,13 @@
       <div class="toolbar-wrapper">
         <div class="buttons">
           <DxButton text="新增用户" styling-mode="contained" type="default" icon="add" @click="dialogVisible = true" />
-          <DxButton text="批量删除" styling-mode="contained" type="danger" icon="trash" />
+          <DxButton
+            text="批量删除"
+            styling-mode="contained"
+            type="danger"
+            icon="trash"
+            @click="selectedRowKeys ? batchDeleteData(selectedRowKeys) : () => {}"
+          />
         </div>
       </div>
       <div class="table-wrapper">
@@ -40,6 +48,7 @@
           column-resizing-mode="widget"
           @exporting="onExporting"
           @content-ready="onContentReady"
+          @selectionChanged="handleSelectionChanged"
         >
           <DxHeaderFilter :visible="true" />
           <DxColumn data-field="username" caption="用户名" alignment="center" />
@@ -130,6 +139,7 @@ import { saveAs } from "file-saver"
 // We recommend that you use the official 'file-saver' package in your applications.
 import { exportDataGrid } from "devextreme/excel_exporter"
 import { useDxDataGrid } from "@/hooks/useDxDataGrid"
+import { SelectionChangedEvent } from "devextreme/ui/data_grid"
 
 defineOptions({
   // 命名当前组件
@@ -138,7 +148,17 @@ defineOptions({
 
 const loading = ref<boolean>(false)
 
-const { paginationData, dataSource, gridContainer, pushData, clearData, onContentReady } = useDxDataGrid()
+const {
+  paginationData,
+  dataSource,
+  gridContainer,
+  pushData,
+  clearData,
+  deleteData,
+  batchDeleteData,
+  updateData,
+  onContentReady
+} = useDxDataGrid<GetTableData>()
 
 //#region 增
 const dialogVisible = ref<boolean>(false)
@@ -157,8 +177,17 @@ const handleCreate = () => {
       if (currentUpdateId.value === undefined) {
         createTableDataApi(formData)
           .then(() => {
+            const newTableData: GetTableData = {
+              createTime: "",
+              email: "",
+              id: "",
+              phone: "",
+              roles: "",
+              status: true,
+              username: formData.username
+            }
+            pushData([newTableData])
             ElMessage.success("新增成功")
-            getTableData()
           })
           .finally(() => {
             dialogVisible.value = false
@@ -169,8 +198,11 @@ const handleCreate = () => {
           username: formData.username
         })
           .then(() => {
+            if (currentUpdateRow.value && currentUpdateRow.value._key) {
+              currentUpdateRow.value.username = formData.username
+              updateData(currentUpdateRow.value._key, currentUpdateRow.value)
+            }
             ElMessage.success("修改成功")
-            getTableData()
           })
           .finally(() => {
             dialogVisible.value = false
@@ -183,6 +215,7 @@ const handleCreate = () => {
 }
 const resetForm = () => {
   currentUpdateId.value = undefined
+  currentUpdateRow.value = undefined
   formData.username = ""
   formData.password = ""
 }
@@ -196,17 +229,26 @@ const handleDelete = (row: GetTableData) => {
     type: "warning"
   }).then(() => {
     deleteTableDataApi(row.id).then(() => {
+      if (row._key) {
+        deleteData(row._key)
+      }
       ElMessage.success("删除成功")
-      getTableData()
+      // getTableData()
     })
   })
+}
+const selectedRowKeys = ref<number[]>()
+const handleSelectionChanged = (event: SelectionChangedEvent) => {
+  selectedRowKeys.value = event.selectedRowKeys
 }
 //#endregion
 
 //#region 改
 const currentUpdateId = ref<undefined | string>(undefined)
+const currentUpdateRow = ref<GetTableData>()
 const handleUpdate = (row: GetTableData) => {
   currentUpdateId.value = row.id
+  currentUpdateRow.value = row
   formData.username = row.username
   dialogVisible.value = true
 }

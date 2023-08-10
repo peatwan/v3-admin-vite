@@ -4,6 +4,7 @@ import DataSource from "devextreme/data/data_source"
 import { throttle } from "lodash-es"
 import { DxDataGrid } from "devextreme-vue"
 import { ScrollEvent } from "devextreme/ui/scroll_view"
+import { PaginationTableData } from "@/api/table/types/table"
 
 interface DefaultPaginationData {
   currentPage: number
@@ -21,7 +22,17 @@ const defaultPaginationData: DefaultPaginationData = {
   pageSize: 20
 }
 
-export function useDxDataGrid(paginationEnbaled: boolean = true, initialPaginationData: PaginationData = {}) {
+/**
+ * DxDataGrid hook
+ * @param paginationEnbaled 是否开启分页
+ * @param reshapeOnPush 是否开启 pushData 后重新应用排序、过滤、分组等数据处理操作, 分页查询必须开启
+ * @param initialPaginationData
+ */
+export function useDxDataGrid<T extends PaginationTableData>(
+  paginationEnbaled: boolean = true,
+  reshapeOnPush: boolean = true,
+  initialPaginationData: PaginationData = {}
+) {
   let store: ArrayStore | null
   let index = 1
   let scrollEventIsSet = false
@@ -34,18 +45,18 @@ export function useDxDataGrid(paginationEnbaled: boolean = true, initialPaginati
    * 首次获取数据后初始化 dataSource
    * @param data
    */
-  const initDataSource = (data: Array<any>) => {
+  const initDataSource = (data: Array<T>) => {
     data.forEach((e) => {
-      e._index = index
+      e._key = index
       index++
     })
     store = new ArrayStore({
-      key: "_index",
+      key: "_key",
       data: data
     })
     dataSource.value = new DataSource({
       store: store,
-      reshapeOnPush: true
+      reshapeOnPush: reshapeOnPush
     })
   }
 
@@ -79,16 +90,16 @@ export function useDxDataGrid(paginationEnbaled: boolean = true, initialPaginati
    * 将 data 添加到 DataGrid 数据源尾部
    * @param data Array
    */
-  const pushData = (data: Array<any>) => {
+  const pushData = (data: Array<T>) => {
     if (!(store instanceof ArrayStore)) {
       initDataSource(data)
     } else {
       const tmpDataArr: Array<{
         type: "insert"
-        data?: Array<any>
+        data?: T
       }> = []
       data.forEach((e) => {
-        e._index = index
+        e._key = index
         index++
         tmpDataArr.push({ type: "insert", data: e })
       })
@@ -107,20 +118,20 @@ export function useDxDataGrid(paginationEnbaled: boolean = true, initialPaginati
   }
 
   /**
-   * 将 data 添加到 DataGrid 数据源头部
+   * 将 data 添加到 DataGrid 数据源头部, 当 reshapeOnPush 为 true 时只能添加 data 到尾部
    * @param data Array
    */
-  const unshiftData = (data: Array<any>) => {
+  const unshiftData = (data: Array<T>) => {
     if (!(store instanceof ArrayStore)) {
       initDataSource(data)
     } else {
       const tmpDataArr: Array<{
         type: "insert"
-        data?: any
+        data?: T
         index: number
       }> = []
       data.forEach((e) => {
-        e._index = index
+        e._key = index
         index++
         tmpDataArr.push({ type: "insert", data: e, index: 0 })
       })
@@ -133,7 +144,7 @@ export function useDxDataGrid(paginationEnbaled: boolean = true, initialPaginati
    * @param key 需要更新的数据的 key
    * @param value 需要更新的数据的 value
    */
-  const updateData = (key: any, value: any) => {
+  const updateData = (key: number, value: T) => {
     if (!(store instanceof ArrayStore)) {
       return
     }
@@ -144,7 +155,7 @@ export function useDxDataGrid(paginationEnbaled: boolean = true, initialPaginati
    * 删除 DataGrid 的一行数据
    * @param key 需要删除的数据的 key
    */
-  const deleteData = (key: any) => {
+  const deleteData = (key: number) => {
     if (!(store instanceof ArrayStore)) {
       return
     }
@@ -155,15 +166,15 @@ export function useDxDataGrid(paginationEnbaled: boolean = true, initialPaginati
    * 删除 DataGrid 的多行数据
    * @param keys 需要删除的数据的 key 的数组
    */
-  const batchDeleteData = (keys: Array<any>) => {
+  const batchDeleteData = (keys: Array<number>) => {
     if (!(store instanceof ArrayStore)) {
       return
     }
     const tmpArr: Array<{
       type: "remove"
-      key?: any
+      key?: number
     }> = []
-    keys.forEach((e: any) => {
+    keys.forEach((e: number) => {
       tmpArr.push({ type: "remove", key: e })
     })
     store.push(tmpArr)
