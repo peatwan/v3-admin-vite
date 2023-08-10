@@ -21,7 +21,7 @@ const defaultPaginationData: DefaultPaginationData = {
   pageSize: 20
 }
 
-export function useDataGrid(paginationEnbaled: boolean = true, initialPaginationData: PaginationData = {}) {
+export function useDxDataGrid(paginationEnbaled: boolean = true, initialPaginationData: PaginationData = {}) {
   let store: ArrayStore | null
   let index = 1
   let scrollEventIsSet = false

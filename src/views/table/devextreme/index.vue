@@ -129,7 +129,7 @@ import { saveAs } from "file-saver"
 // Our demo infrastructure requires us to use 'file-saver-es'.
 // We recommend that you use the official 'file-saver' package in your applications.
 import { exportDataGrid } from "devextreme/excel_exporter"
-import { useDataGrid } from "@/hooks/usePaginationDataGrid"
+import { useDxDataGrid } from "@/hooks/useDxDataGrid"
 
 defineOptions({
   // 命名当前组件
@@ -138,7 +138,7 @@ defineOptions({
 
 const loading = ref<boolean>(false)
 
-const { paginationData, dataSource, gridContainer, pushData, clearData, onContentReady } = useDataGrid()
+const { paginationData, dataSource, gridContainer, pushData, clearData, onContentReady } = useDxDataGrid()
 
 //#region 增
 const dialogVisible = ref<boolean>(false)
@@ -332,3 +332,4 @@ const onExporting = (e: any) => {
 //   height: 620px;
 // }
 </style>
+@/hooks/useDxDataGrid
