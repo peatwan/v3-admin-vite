@@ -8,6 +8,7 @@ import { createSvgIconsPlugin } from "vite-plugin-svg-icons"
 import svgLoader from "vite-svg-loader"
 import UnoCSS from "unocss/vite"
 import { viteMockServe } from "vite-plugin-mock"
+import viteCompression from "vite-plugin-compression"
 
 /** 配置项文档：https://cn.vitejs.dev/config */
 export default (configEnv: ConfigEnv): UserConfigExport => {
@@ -38,13 +39,13 @@ export default (configEnv: ConfigEnv): UserConfigExport => {
       strictPort: false,
       /** 接口代理 */
       proxy: {
-        "/api/v1": {
-          // target: "https://mock.mengxuegu.com/mock/63218b5fb4c53348ed2bc212",
-          target: "https://www.fastmock.site/mock/761e2dda2b8890ab86c928a74e8f6538",
-          ws: true,
-          /** 是否允许跨域 */
-          changeOrigin: true
-        }
+        // "/api/v1": {
+        //   // target: "https://mock.mengxuegu.com/mock/63218b5fb4c53348ed2bc212",
+        //   target: "https://www.fastmock.site/mock/761e2dda2b8890ab86c928a74e8f6538",
+        //   ws: true,
+        //   /** 是否允许跨域 */
+        //   changeOrigin: true
+        // }
       }
     },
     build: {
@@ -81,10 +82,12 @@ export default (configEnv: ConfigEnv): UserConfigExport => {
       /** UnoCSS */
       UnoCSS(),
       viteMockServe({
-        // default
+        /** mock 文件路径 */
         mockPath: "mock",
+        /** dev server 是否打开 mock */
         localEnabled: true
-      })
+      }),
+      viteCompression()
     ],
     /** Vitest 单元测试配置：https://cn.vitest.dev/config */
     test: {

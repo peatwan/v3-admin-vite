@@ -74,6 +74,7 @@
     "typescript": "5.1.6",
     "unocss": "0.54.1",
     "vite": "4.4.8",
+    "vite-plugin-compression": "0.5.1",
     "vite-plugin-mock": "2.9.8",
     "vite-plugin-svg-icons": "2.0.1",
     "vite-svg-loader": "4.0.0",
