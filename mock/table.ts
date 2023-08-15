@@ -37,6 +37,7 @@ export default [
   {
     url: "/api/v1/table",
     method: "get",
+    timeout: 200,
     response: ({ query, headers }) => {
       return {
         code: () => {

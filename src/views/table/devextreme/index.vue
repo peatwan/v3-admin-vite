@@ -299,6 +299,14 @@ onBeforeUnmount(() => {
 
 /** 监听分页参数的变化 */
 watch([() => paginationData.currentPage, () => paginationData.pageSize], getTableData, { immediate: true })
+/** 监听 loading 判断是否显示 loadPanel */
+watch(loading, () => {
+  if (loading.value) {
+    gridContainer.value?.instance?.beginCustomLoading("")
+  } else {
+    gridContainer.value?.instance?.endCustomLoading()
+  }
+})
 
 const onExporting = (e: any) => {
   const workbook = new Workbook()

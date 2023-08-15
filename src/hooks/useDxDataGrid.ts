@@ -39,6 +39,7 @@ export function useDxDataGrid<T extends PaginationTableData>(
   const lastPage = false
   const paginationData = reactive({ ...defaultPaginationData, ...initialPaginationData })
   const dataSource = ref<DataSource>()
+  /** DxDataGrid 引用 */
   const gridContainer = ref<DxDataGrid>()
 
   /**
@@ -67,7 +68,7 @@ export function useDxDataGrid<T extends PaginationTableData>(
     if (paginationEnbaled && !scrollEventIsSet) {
       const scrollView = gridContainer.value?.instance?.getScrollable()
       if (scrollView) {
-        scrollView.on("scroll", throttle(handleScroll, 100))
+        scrollView.on("scroll", throttle(handleScroll, 200))
         scrollEventIsSet = true
       }
     }
