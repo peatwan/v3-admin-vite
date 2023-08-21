@@ -36,7 +36,7 @@ export function useDxDataGrid<T extends PaginationTableData>(
   let store: ArrayStore | null
   let index = 1
   let scrollEventIsSet = false
-  const lastPage = false
+  const lastPage = ref(false)
   const paginationData = reactive({ ...defaultPaginationData, ...initialPaginationData })
   const dataSource = ref<DataSource>()
   /** DxDataGrid 引用 */
@@ -79,10 +79,7 @@ export function useDxDataGrid<T extends PaginationTableData>(
    * @param event 滚动事件
    */
   const handleScroll = (event: ScrollEvent) => {
-    if (paginationEnbaled && event.reachedBottom) {
-      if (lastPage) {
-        return
-      }
+    if (paginationEnbaled && event.reachedBottom && !lastPage.value) {
       nextPage()
     }
   }
@@ -192,6 +189,7 @@ export function useDxDataGrid<T extends PaginationTableData>(
     paginationData,
     dataSource,
     gridContainer,
+    lastPage,
     onContentReady,
     pushData,
     clearData,

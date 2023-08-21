@@ -86,6 +86,14 @@
           <DxScrolling mode="virtual" :render-async="false" />
         </DxDataGrid>
       </div>
+      <div style="text-align: right">
+        <ElTooltip content="回到顶部" effect="light">
+          <el-button icon="DArrowLeft" @click="goTop" />
+        </ElTooltip>
+        <ElTooltip content="最后一页" effect="light">
+          <el-button icon="DArrowRight" @click="goLastPage" :disabled="lastPage" />
+        </ElTooltip>
+      </div>
     </div>
     <!-- 新增/修改 -->
     <el-dialog
@@ -114,7 +122,7 @@
 import { reactive, ref, watch, onActivated, onBeforeUnmount } from "vue"
 import { createTableDataApi, deleteTableDataApi, updateTableDataApi, getTableDataApi } from "@/api/table/"
 import { type GetTableData } from "@/api/table/types/table"
-import { type FormInstance, type FormRules, ElMessage, ElMessageBox } from "element-plus"
+import { type FormInstance, type FormRules, ElMessage, ElMessageBox, ElButton, ElTooltip } from "element-plus"
 
 import {
   DxDataGrid,
@@ -135,11 +143,9 @@ import DxTextBox from "devextreme-vue/text-box"
 import DxButton from "devextreme-vue/button"
 import { Workbook } from "exceljs"
 import { saveAs } from "file-saver"
-// Our demo infrastructure requires us to use 'file-saver-es'.
-// We recommend that you use the official 'file-saver' package in your applications.
 import { exportDataGrid } from "devextreme/excel_exporter"
 import { useDxDataGrid } from "@/hooks/useDxDataGrid"
-import { SelectionChangedEvent } from "devextreme/ui/data_grid"
+import { ExportingEvent, SelectionChangedEvent } from "devextreme/ui/data_grid"
 
 defineOptions({
   // 命名当前组件
@@ -152,6 +158,7 @@ const {
   paginationData,
   dataSource,
   gridContainer,
+  lastPage,
   pushData,
   clearData,
   deleteData,
@@ -261,6 +268,7 @@ const searchData = reactive({
 })
 
 const getTableData = () => {
+  if (lastPage.value) return
   loading.value = true
   getTableDataApi({
     currentPage: paginationData.currentPage,
@@ -278,6 +286,7 @@ const getTableData = () => {
 }
 const handleSearch = () => {
   clearData()
+  lastPage.value = false
   paginationData.currentPage === 1 ? getTableData() : (paginationData.currentPage = 1)
 }
 const resetSearch = () => {
@@ -285,6 +294,7 @@ const resetSearch = () => {
   searchData.phone = ""
   handleSearch()
 }
+//#endregion
 
 onActivated(() => {
   // 调用时机为首次挂载
@@ -295,10 +305,9 @@ onActivated(() => {
 onBeforeUnmount(() => {
   clearData()
 })
-//#endregion
 
 /** 监听分页参数的变化 */
-watch([() => paginationData.currentPage, () => paginationData.pageSize], getTableData, { immediate: true })
+watch([() => paginationData.currentPage], getTableData, { immediate: true })
 /** 监听 loading 判断是否显示 loadPanel */
 watch(loading, () => {
   if (loading.value) {
@@ -308,7 +317,10 @@ watch(loading, () => {
   }
 })
 
-const onExporting = (e: any) => {
+/**
+ * 导出 DataGrid 数据
+ */
+const onExporting = (e: ExportingEvent) => {
   const workbook = new Workbook()
   const worksheet = workbook.addWorksheet("Employees")
 
@@ -322,6 +334,45 @@ const onExporting = (e: any) => {
     })
   })
   e.cancel = true
+}
+
+/**
+ * 回到顶部
+ */
+const goTop = () => {
+  gridContainer.value?.instance?.getScrollable().scrollTo(0)
+}
+
+/**
+ * 获取所有数据
+ * @param pageNum 最后一页的页码
+ */
+const getAllTableData = async (pageNum?: number) => {
+  if (pageNum) {
+    let i = paginationData.currentPage + 1
+    for (; i <= pageNum; i++) {
+      await getTableDataApi({
+        currentPage: i,
+        size: paginationData.pageSize,
+        username: searchData.username || undefined,
+        phone: searchData.phone || undefined
+      }).then((res) => {
+        pushData(res.data.list)
+      })
+    }
+    paginationData.currentPage = i - 1
+  }
+}
+
+/**
+ * 翻到最后一页(加载所有数据)
+ */
+const goLastPage = () => {
+  lastPage.value = true
+  loading.value = true
+  getAllTableData(20).finally(() => {
+    loading.value = false
+  })
 }
 </script>
 
@@ -354,7 +405,7 @@ const onExporting = (e: any) => {
 }
 
 .data-grid-wrapper {
-  margin-bottom: 20px;
+  // margin-bottom: 10px;
   padding: 15px;
   background-color: rgb(255, 255, 255);
   .toolbar-wrapper {
@@ -368,7 +419,7 @@ const onExporting = (e: any) => {
     }
   }
   .table-wrapper {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     .dx-data-grid-containner {
       height: 620px;
     }
@@ -378,8 +429,5 @@ const onExporting = (e: any) => {
     justify-content: flex-end;
   }
 }
-// #gridContainer {
-//   height: 620px;
-// }
 </style>
 @/hooks/useDxDataGrid
