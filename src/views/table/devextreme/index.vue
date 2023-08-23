@@ -377,24 +377,8 @@ const goLastPage = () => {
 </script>
 
 <style lang="scss" scoped>
-.options {
-  padding: 20px;
-  margin-top: 20px;
-  background-color: rgba(191, 191, 191, 0.15);
-}
-
-.caption {
-  font-size: 18px;
-  font-weight: 500;
-}
-
-.option {
-  margin-top: 10px;
-}
-
 .search-wrapper {
   margin-bottom: 20px;
-  background-color: rgb(255, 255, 255);
   display: flex;
   justify-content: flex-start;
   padding: 15px;
@@ -407,7 +391,6 @@ const goLastPage = () => {
 .data-grid-wrapper {
   // margin-bottom: 10px;
   padding: 15px;
-  background-color: rgb(255, 255, 255);
   .toolbar-wrapper {
     display: flex;
     justify-content: space-between;
@@ -424,10 +407,5 @@ const goLastPage = () => {
       height: 620px;
     }
   }
-  .pager-wrapper {
-    display: flex;
-    justify-content: flex-end;
-  }
 }
 </style>
-@/hooks/useDxDataGrid

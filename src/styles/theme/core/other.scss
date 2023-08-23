@@ -3,4 +3,10 @@
 .app-main {
   background-color: $theme-bg-color !important;
   // 写在这里...
+  .search-wrapper {
+    background-color: #1d1e1f;
+  }
+  .data-grid-wrapper {
+    background-color: #1d1e1f;
+  }
 }

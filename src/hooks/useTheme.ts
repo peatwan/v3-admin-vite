@@ -1,5 +1,6 @@
 import { ref, watchEffect } from "vue"
 import { getActiveThemeName, setActiveThemeName } from "@/utils/cache/local-storage"
+import themes from "devextreme/ui/themes"
 
 const DEFAULT_THEME_NAME = "normal"
 type DefaultThemeName = typeof DEFAULT_THEME_NAME
@@ -21,11 +22,11 @@ const themeList: ThemeList[] = [
   {
     title: "黑暗",
     name: "dark"
-  },
-  {
-    title: "深蓝",
-    name: "dark-blue"
   }
+  // {
+  //   title: "深蓝",
+  //   name: "dark-blue"
+  // }
 ]
 
 /** 正在应用的主题名称 */
@@ -48,6 +49,7 @@ const initTheme = () => {
     const value = activeThemeName.value
     setHtmlRootClassName(value)
     setActiveThemeName(value)
+    themes.current(value) //切换 DevExtreme 主题
   })
 }
 
