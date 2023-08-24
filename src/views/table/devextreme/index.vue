@@ -1,43 +1,31 @@
 <template>
   <div class="app-container">
-    <div class="search-wrapper">
-      <DxTextBox v-model="searchData.username" :max-length="40" styling-mode="outlined" label="用户名" />
-      <DxTextBox v-model="searchData.phone" :max-length="40" styling-mode="outlined" label="手机号" />
-      <DxButton
-        class="action-button"
-        text="查询"
-        styling-mode="contained"
-        type="default"
-        icon="search"
-        :disabled="loading"
-        @click="handleSearch"
-      />
-      <DxButton
-        class="action-button"
-        text="重置"
-        styling-mode="contained"
-        type="normal"
-        icon="revert"
-        :disabled="loading"
-        @click="resetSearch"
-      />
-    </div>
-    <div class="data-grid-wrapper">
+    <el-card shadow="never" class="search-wrapper">
+      <el-form ref="searchFormRef" :inline="true" :model="searchData">
+        <el-form-item prop="username" label="用户名">
+          <el-input v-model="searchData.username" placeholder="请输入" :disabled="loading" />
+        </el-form-item>
+        <el-form-item prop="phone" label="手机号">
+          <el-input v-model="searchData.phone" placeholder="请输入" :disabled="loading" />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" :icon="Search" @click="handleSearch" :disabled="loading">查询</el-button>
+          <el-button :icon="Refresh" @click="resetSearch" :disabled="loading">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+    <el-card shadow="never">
       <div class="toolbar-wrapper">
-        <div class="buttons">
-          <DxButton text="新增用户" styling-mode="contained" type="default" icon="add" @click="dialogVisible = true" />
-          <DxButton
-            text="批量删除"
-            styling-mode="contained"
-            type="danger"
-            icon="trash"
-            @click="selectedRowKeys ? batchDeleteData(selectedRowKeys) : () => {}"
-          />
+        <div>
+          <el-button type="primary" :icon="CirclePlus" @click="dialogVisible = true">新增用户</el-button>
+          <el-button type="danger" :icon="Delete" @click="selectedRowKeys ? batchDeleteData(selectedRowKeys) : () => {}"
+            >批量删除</el-button
+          >
         </div>
       </div>
       <div class="table-wrapper">
         <DxDataGrid
-          class="dx-data-grid-containner"
+          class="dx-data-grid-container"
           ref="gridContainer"
           :allow-column-reordering="true"
           :data-source="dataSource"
@@ -94,7 +82,7 @@
           <el-button icon="DArrowRight" @click="goLastPage" :disabled="lastPage" />
         </ElTooltip>
       </div>
-    </div>
+    </el-card>
     <!-- 新增/修改 -->
     <el-dialog
       v-model="dialogVisible"
@@ -123,6 +111,7 @@ import { reactive, ref, watch, onActivated, onBeforeUnmount } from "vue"
 import { createTableDataApi, deleteTableDataApi, updateTableDataApi, getTableDataApi } from "@/api/table/"
 import { type GetTableData } from "@/api/table/types/table"
 import { type FormInstance, type FormRules, ElMessage, ElMessageBox, ElButton, ElTooltip } from "element-plus"
+import { Search, Refresh, CirclePlus, Delete } from "@element-plus/icons-vue"
 
 import {
   DxDataGrid,
@@ -139,8 +128,6 @@ import {
   DxPosition,
   DxScrolling
 } from "devextreme-vue/data-grid"
-import DxTextBox from "devextreme-vue/text-box"
-import DxButton from "devextreme-vue/button"
 import { Workbook } from "exceljs"
 import { saveAs } from "file-saver"
 import { exportDataGrid } from "devextreme/excel_exporter"
@@ -379,33 +366,17 @@ const goLastPage = () => {
 <style lang="scss" scoped>
 .search-wrapper {
   margin-bottom: 20px;
-  display: flex;
-  justify-content: flex-start;
-  padding: 15px;
-  gap: 15px;
-  .action-button {
-    margin-top: 7.5px;
+  :deep(.el-card__body) {
+    padding-bottom: 2px;
   }
 }
 
-.data-grid-wrapper {
-  // margin-bottom: 10px;
-  padding: 15px;
-  .toolbar-wrapper {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    .buttons {
-      justify-content: space-between;
-      gap: 15px;
-      display: flex;
-    }
-  }
-  .table-wrapper {
-    margin-bottom: 10px;
-    .dx-data-grid-containner {
-      height: 620px;
-    }
-  }
+.toolbar-wrapper {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.table-wrapper {
+  margin-bottom: 10px;
 }
 </style>
