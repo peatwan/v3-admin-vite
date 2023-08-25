@@ -47,7 +47,7 @@ locale(navigator.language)
 </script>
 
 <template>
-  <ElConfigProvider :locale="zhCn">
+  <el-config-provider :locale="zhCn">
     <router-view />
-  </ElConfigProvider>
+  </el-config-provider>
 </template>
