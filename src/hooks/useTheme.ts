@@ -2,7 +2,7 @@ import { ref, watchEffect } from "vue"
 import { getActiveThemeName, setActiveThemeName } from "@/utils/cache/local-storage"
 import themes from "devextreme/ui/themes"
 
-const DEFAULT_THEME_NAME = "normal"
+const DEFAULT_THEME_NAME = "light"
 type DefaultThemeName = typeof DEFAULT_THEME_NAME
 
 /** 注册的主题名称, 其中 DefaultThemeName 是必填的 */
@@ -49,7 +49,7 @@ const initTheme = () => {
     const value = activeThemeName.value
     setHtmlRootClassName(value)
     setActiveThemeName(value)
-    themes.current(value) //切换 DevExtreme 主题
+    themes.current("generic." + value) //切换 DevExtreme 主题
   })
 }
 
