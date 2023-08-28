@@ -1,4 +1,4 @@
-import { ref, reactive } from "vue"
+import { ref, reactive, shallowRef } from "vue"
 import ArrayStore from "devextreme/data/array_store"
 import DataSource from "devextreme/data/data_source"
 import { throttle } from "lodash-es"
@@ -38,7 +38,7 @@ export function useDxDataGrid<T extends PaginationTableData>(
   let scrollEventIsSet = false
   const lastPage = ref(false)
   const paginationData = reactive({ ...defaultPaginationData, ...initialPaginationData })
-  const dataSource = ref<DataSource>()
+  const dataSource = shallowRef<DataSource>()
   /** DxDataGrid 引用 */
   const gridContainer = ref<DxDataGrid>()
 
