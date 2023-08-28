@@ -29,49 +29,46 @@
           ref="gridContainer"
           :allow-column-reordering="true"
           :data-source="dataSource"
+          :columns="columns"
           :show-borders="false"
-          :columnAutoWidth="false"
+          :column-auto-width="false"
           :showRowLines="true"
           :showColumnLines="false"
+          :allow-column-resizing="true"
           column-resizing-mode="widget"
           @exporting="onExporting"
           @content-ready="onContentReady"
           @selectionChanged="handleSelectionChanged"
         >
-          <DxHeaderFilter :visible="true" />
-          <DxColumn data-field="username" caption="用户名" alignment="center" />
-          <DxColumn data-field="roles" caption="角色" cell-template="role-cell" alignment="center" />
-          <template #role-cell="{ data }">
-            <el-tag v-if="data.data.roles === 'admin'" effect="plain">admin</el-tag>
-            <el-tag v-else type="warning" effect="plain">{{ data.data.roles }}</el-tag>
-          </template>
-
-          <DxColumn data-field="phone" caption="手机号" alignment="center" />
-          <DxColumn data-field="email" caption="邮箱" alignment="center" />
-          <DxColumn data-field="status" caption="状态" cell-template="status-cell" alignment="center" />
-          <template #status-cell="{ data }">
-            <el-tag v-if="data.data.status" type="success" effect="plain">启用</el-tag>
-            <el-tag v-else type="danger" effect="plain">禁用</el-tag>
-          </template>
-          <DxColumn data-field="createTime" caption="创建时间" alignment="center" />
-          <DxColumn caption="操作" cell-template="action-cell" alignment="center" />
-          <template #action-cell="{ data }">
-            <el-button type="primary" text bg size="small" @click="handleUpdate(data.data)">修改</el-button>
-            <el-button type="danger" text bg size="small" @click="handleDelete(data.data)">删除</el-button>
-          </template>
+          <!-- DxDataGrid 属性 -->
+          <DxHeaderFilter :visible="true">
+            <DxSearch :enabled="true" />
+          </DxHeaderFilter>
           <DxColumnChooser :enabled="true" mode="select">
             <DxPosition my="right top" at="right bottom" of=".dx-datagrid-column-chooser-button" />
-
             <DxColumnChooserSearch :enabled="true" />
             <DxColumnChooserSelection :allow-select-all="true" />
           </DxColumnChooser>
-
           <DxGroupPanel :visible="true" />
           <DxGrouping />
           <DxSearchPanel :visible="true" />
           <DxSelection mode="multiple" />
           <DxExport :enabled="true" :allow-export-selected-data="true" />
           <DxScrolling mode="virtual" :render-async="false" />
+          <DxSorting mode="multiple" />
+          <!-- 列模板  -->
+          <template #role-cell="{ data }">
+            <el-tag v-if="data.data.roles === 'admin'" effect="plain">admin</el-tag>
+            <el-tag v-else type="warning" effect="plain">{{ data.data.roles }}</el-tag>
+          </template>
+          <template #status-cell="{ data }">
+            <el-tag v-if="data.data.status" type="success" effect="plain">启用</el-tag>
+            <el-tag v-else type="danger" effect="plain">禁用</el-tag>
+          </template>
+          <template #action-cell="{ data }">
+            <el-button type="primary" text bg size="small" @click="handleUpdate(data.data)">修改</el-button>
+            <el-button type="danger" text bg size="small" @click="handleDelete(data.data)">删除</el-button>
+          </template>
         </DxDataGrid>
       </div>
       <div style="text-align: right">
@@ -115,7 +112,6 @@ import { Search, Refresh, CirclePlus, Delete } from "@element-plus/icons-vue"
 
 import {
   DxDataGrid,
-  DxColumn,
   DxGrouping,
   DxGroupPanel,
   DxSearchPanel,
@@ -126,13 +122,16 @@ import {
   DxColumnChooserSearch,
   DxColumnChooserSelection,
   DxPosition,
-  DxScrolling
+  DxScrolling,
+  DxSorting,
+  DxSearch
 } from "devextreme-vue/data-grid"
 import { Workbook } from "exceljs"
 import { saveAs } from "file-saver"
 import { exportDataGrid } from "devextreme/excel_exporter"
 import { useDxDataGrid } from "@/hooks/useDxDataGrid"
 import { ExportingEvent, SelectionChangedEvent } from "devextreme/ui/data_grid"
+import columns from "./columns"
 
 defineOptions({
   // 命名当前组件
@@ -378,5 +377,7 @@ const goLastPage = () => {
 }
 .table-wrapper {
   margin-bottom: 10px;
+  //必须设置高度，表格才能实现滚动翻页
+  height: 620px;
 }
 </style>
