@@ -89,7 +89,7 @@ defineExpose({ getScrollTop })
       <SvgIcon v-if="item.meta?.svgIcon" :name="item.meta.svgIcon" />
       <component v-else-if="item.meta?.elIcon" :is="item.meta.elIcon" class="el-icon" />
       <span class="result-item-title">
-        {{ item.meta?.title }}
+        {{ item.meta?.searchMenu }}
       </span>
       <SvgIcon v-if="activeRouteName && activeRouteName === item.name" name="keyboard-enter" />
     </div>

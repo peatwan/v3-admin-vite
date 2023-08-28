@@ -51,21 +51,50 @@ const menusData = computed(() => cloneDeep(usePermissionStore().routes))
 const handleSearch = debounce(() => {
   const flatMenusData = flatTree(menusData.value)
   resultList.value = flatMenusData.filter((menu) =>
-    keyword.value ? menu.meta?.title?.toLocaleLowerCase().includes(keyword.value.toLocaleLowerCase().trim()) : false
+    keyword.value
+      ? menu.meta?.searchMenu?.toLocaleLowerCase().includes(keyword.value.toLocaleLowerCase().trim())
+      : false
   )
+  // console.log(resultList.value, "$$$$$")
+
   // 默认选中搜索结果的第一项
   const length = resultList.value?.length
   activeRouteName.value = length > 0 ? resultList.value[0].name : undefined
 }, 500)
 
 /** 将树形菜单扁平化为一维数组，用于菜单搜索 */
+// const flatTree = (arr: RouteRecordRaw[], result: RouteRecordRaw[] = []) => {
+//   arr.forEach((item: any) => {
+//     result.push(item)
+//     item.children && flatTree(item.children, result)
+//   })
+//   return result
+// }
 const flatTree = (arr: RouteRecordRaw[], result: RouteRecordRaw[] = []) => {
-  arr.forEach((item) => {
-    result.push(item)
-    item.children && flatTree(item.children, result)
+  arr.forEach((item: any) => {
+    if (item.children) {
+      flatTree(item.children, result)
+    } else {
+      result.push(item)
+    }
   })
   return result
 }
+
+// const dfs = (arr: any, res: any = []) => {
+//   for (let i = 0; i < arr.length; i++) {
+//     let menu: any = arr[i]?.meta?.title?.repeat(1)
+//     if (menu) {
+//       res.push(menu)
+//       if (arr[i].meta.title) arr[i].meta.title = res.join("-") + arr[i].meta.title
+//     }
+//     if (arr[i].hasOwnProperty("children")) {
+//       dfs(arr[i].children, res)
+//       res.pop()
+//     }
+//   }
+//   return res
+// }
 
 /** 关闭搜索对话框 */
 const handleClose = () => {
