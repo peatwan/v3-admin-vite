@@ -9,7 +9,7 @@ declare module "vue-router" {
     /**
      * 设置该路由在搜索菜单中展示的名字
      */
-    searchMenu?: string
+    lablePath?: string
     /**
      * 设置该路由的图标，记得将 svg 导入 @/icons/svg
      */

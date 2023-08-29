@@ -55,7 +55,6 @@ export const constantRoutes: RouteRecordRaw[] = [
         name: "Dashboard",
         meta: {
           title: "首页",
-          searchMenu: "首页",
           svgIcon: "dashboard",
           affix: true
         }
@@ -73,7 +72,6 @@ export const constantRoutes: RouteRecordRaw[] = [
         name: "UnoCSS",
         meta: {
           title: "unocss",
-          searchMenu: "unocss",
           svgIcon: "unocss"
         }
       }
@@ -89,7 +87,6 @@ export const constantRoutes: RouteRecordRaw[] = [
         name: "Link",
         meta: {
           title: "外链",
-          searchMenu: "外链",
           svgIcon: "link"
         }
       }
@@ -120,7 +117,6 @@ export const constantRoutes: RouteRecordRaw[] = [
         name: "VxeTable",
         meta: {
           title: "Vxe Table",
-          searchMenu: "表格——Vxe Table",
           keepAlive: true
         }
       },
@@ -130,7 +126,6 @@ export const constantRoutes: RouteRecordRaw[] = [
         name: "DevExtremeTable",
         meta: {
           title: "DevExtreme",
-          searchMenu: "表格——DevExtreme",
           keepAlive: true
         }
       }
@@ -161,7 +156,6 @@ export const constantRoutes: RouteRecordRaw[] = [
             name: "Menu1-1",
             meta: {
               title: "menu1-1",
-              searchMenu: "多级路由——menu1——menu1-1",
               keepAlive: true
             }
           },
@@ -180,7 +174,6 @@ export const constantRoutes: RouteRecordRaw[] = [
                 name: "Menu1-2-1",
                 meta: {
                   title: "menu1-2-1",
-                  searchMenu: "多级路由——menu1——menu1-2——menu1-2-1",
                   keepAlive: true
                 }
               },
@@ -190,7 +183,6 @@ export const constantRoutes: RouteRecordRaw[] = [
                 name: "Menu1-2-2",
                 meta: {
                   title: "menu1-2-2",
-                  searchMenu: "多级路由——menu1——menu1-2——menu1-2-1",
                   keepAlive: true
                 }
               }
@@ -202,7 +194,6 @@ export const constantRoutes: RouteRecordRaw[] = [
             name: "Menu1-3",
             meta: {
               title: "menu1-3",
-              searchMenu: "多级路由——menu1——menu1-3",
               keepAlive: true
             }
           }
@@ -214,7 +205,6 @@ export const constantRoutes: RouteRecordRaw[] = [
         name: "Menu2",
         meta: {
           title: "menu2",
-          searchMenu: "多级路由——menu2",
           keepAlive: true
         }
       }
@@ -236,8 +226,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         component: () => import("@/views/hook-demo/use-fetch-select.vue"),
         name: "UseFetchSelect",
         meta: {
-          title: "useFetchSelect",
-          searchMenu: "hook 示例——useFetchSelect"
+          title: "useFetchSelect"
         }
       },
       {
@@ -245,8 +234,7 @@ export const constantRoutes: RouteRecordRaw[] = [
         component: () => import("@/views/hook-demo/use-fullscreen-loading.vue"),
         name: "UseFullscreenLoading",
         meta: {
-          title: "useFullscreenLoading",
-          searchMenu: "hook 示例——useFetchSelect"
+          title: "useFullscreenLoading"
         }
       }
     ]
@@ -277,7 +265,6 @@ export const asyncRoutes: RouteRecordRaw[] = [
         name: "PagePermission",
         meta: {
           title: "页面权限",
-          searchMenu: "权限管理——页面权限",
           roles: ["admin"] // 或者在子导航中设置角色
         }
       },
@@ -286,8 +273,7 @@ export const asyncRoutes: RouteRecordRaw[] = [
         component: () => import("@/views/permission/directive.vue"),
         name: "DirectivePermission",
         meta: {
-          title: "指令权限", // 如果未设置角色，则表示：该页面不需要权限，但会继承根路由的角色
-          searchMenu: "权限管理——指令权限"
+          title: "指令权限" // 如果未设置角色，则表示：该页面不需要权限，但会继承根路由的角色
         }
       }
     ]
