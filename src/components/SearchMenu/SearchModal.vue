@@ -49,32 +49,13 @@ const menusData = computed(() => cloneDeep(usePermissionStore().routes))
 
 /** 搜索（防抖） */
 const handleSearch = debounce(() => {
-  //const flatMenusData = flatTree(menusData.value)
-  // resultList.value = flatMenusData.filter((menu) =>
-  //   keyword.value
-  //     ? menu.meta?.searchMenu?.toLocaleLowerCase().includes(keyword.value.toLocaleLowerCase().trim())
-  //     : false
-  // )
-  resultList.value = dfs(keyword.value, menusData.value, [], "")
-  console.log(resultList.value)
-
+  resultList.value = searchMenu(keyword.value, menusData.value, [], "")
   // 默认选中搜索结果的第一项
   const length = resultList.value?.length
   activeRouteName.value = length > 0 ? resultList.value[0].name : undefined
 }, 500)
 
-// const flatTree = (arr: RouteRecordRaw[], result: RouteRecordRaw[] = []) => {
-//   arr.forEach((item: any) => {
-//     if (item.children) {
-//       flatTree(item.children, result)
-//     } else {
-//       result.push(item)
-//     }
-//   })
-//   return result
-// }
-
-const dfs = (queryString: string, tree: RouteRecordRaw[], arr: RouteRecordRaw[] = [], path: string = "") => {
+const searchMenu = (queryString: string, tree: RouteRecordRaw[], arr: RouteRecordRaw[] = [], path: string = "") => {
   if (!tree.length) return []
   for (const item of tree) {
     if (Array.isArray(item.children) && item.children.length > 0) {
@@ -84,7 +65,7 @@ const dfs = (queryString: string, tree: RouteRecordRaw[], arr: RouteRecordRaw[] 
       } else {
         fullPath = path + "/" + item.meta?.title
       }
-      dfs(queryString, item.children, arr, fullPath)
+      searchMenu(queryString, item.children, arr, fullPath)
     } else {
       if (keyword.value && item.meta?.title?.toLocaleLowerCase().includes(keyword.value.toLocaleLowerCase().trim())) {
         item.meta.lablePath = path
