@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import { getCurrentInstance, onMounted, onUnmounted, ref, watch } from "vue"
+import { getCurrentInstance, onMounted, ref, watch } from "vue"
 import { type RouteLocationNormalizedLoaded, type RouteRecordRaw, RouterLink, useRoute, useRouter } from "vue-router"
 import { type TagView, useTagsViewStore } from "@/store/modules/tags-view"
 import { usePermissionStore } from "@/store/modules/permission"
-import { listenerRouteChange, removeRouteListener } from "@/utils/route-listener"
+import { useRouteListener } from "@/hooks/useRouteListener"
 import path from "path-browserify"
 import ScrollPane from "./ScrollPane.vue"
 import { Close } from "@element-plus/icons-vue"
@@ -13,6 +13,7 @@ const router = useRouter()
 const route = useRoute()
 const tagsViewStore = useTagsViewStore()
 const permissionStore = usePermissionStore()
+const { listenerRouteChange } = useRouteListener()
 
 /** 标签页组件元素的引用数组 */
 const tagRefs = ref<InstanceType<typeof RouterLink>[]>([])
@@ -148,21 +149,16 @@ const closeMenu = () => {
   visible.value = false
 }
 
-listenerRouteChange((route) => {
-  addTags(route)
-})
-
 watch(visible, (value) => {
   value ? document.body.addEventListener("click", closeMenu) : document.body.removeEventListener("click", closeMenu)
 })
 
 onMounted(() => {
   initTags()
-  addTags(route)
-})
-
-onUnmounted(() => {
-  removeRouteListener()
+  /** 监听路由变化 */
+  listenerRouteChange(async (route) => {
+    addTags(route)
+  }, true)
 })
 </script>
 
