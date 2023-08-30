@@ -49,13 +49,14 @@ const menusData = computed(() => cloneDeep(usePermissionStore().routes))
 
 /** 搜索（防抖） */
 const handleSearch = debounce(() => {
-  resultList.value = searchMenu(keyword.value, menusData.value, [], "")
+  resultList.value = filterMenu(keyword.value, menusData.value, [], "")
   // 默认选中搜索结果的第一项
   const length = resultList.value?.length
   activeRouteName.value = length > 0 ? resultList.value[0].name : undefined
 }, 500)
 
-const searchMenu = (queryString: string, tree: RouteRecordRaw[], arr: RouteRecordRaw[] = [], path: string = "") => {
+/** 搜索菜单并附带完整路径 */
+const filterMenu = (queryString: string, tree: RouteRecordRaw[], arr: RouteRecordRaw[] = [], path: string = "") => {
   if (!tree.length) return []
   for (const item of tree) {
     if (Array.isArray(item.children) && item.children.length > 0) {
@@ -65,7 +66,7 @@ const searchMenu = (queryString: string, tree: RouteRecordRaw[], arr: RouteRecor
       } else {
         fullPath = path + "/" + item.meta?.title
       }
-      searchMenu(queryString, item.children, arr, fullPath)
+      filterMenu(queryString, item.children, arr, fullPath)
     } else {
       if (keyword.value && item.meta?.title?.toLocaleLowerCase().includes(keyword.value.toLocaleLowerCase().trim())) {
         item.meta.lablePath = path

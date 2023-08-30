@@ -7,7 +7,7 @@ declare module "vue-router" {
      */
     title?: string
     /**
-     * 设置该路由在搜索菜单中展示的名字
+     * 设置该路由在搜索菜单中展示的完整路径
      */
     lablePath?: string
     /**
