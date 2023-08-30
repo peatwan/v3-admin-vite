@@ -14,7 +14,7 @@ initTheme()
 
 /** DevExtreme 中文语言包 */
 loadMessages(zhMessages)
-locale(navigator.language)
+locale("zh-CN")
 
 /** 作者小心思 */
 // ElNotification({
