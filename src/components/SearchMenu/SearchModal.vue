@@ -49,22 +49,32 @@ const menusData = computed(() => cloneDeep(usePermissionStore().routes))
 
 /** 搜索（防抖） */
 const handleSearch = debounce(() => {
-  const flatMenusData = flatTree(menusData.value)
-  resultList.value = flatMenusData.filter((menu) =>
-    keyword.value ? menu.meta?.title?.toLocaleLowerCase().includes(keyword.value.toLocaleLowerCase().trim()) : false
-  )
+  resultList.value = filterMenu(keyword.value, menusData.value, [], "")
   // 默认选中搜索结果的第一项
   const length = resultList.value?.length
   activeRouteName.value = length > 0 ? resultList.value[0].name : undefined
 }, 500)
 
-/** 将树形菜单扁平化为一维数组，用于菜单搜索 */
-const flatTree = (arr: RouteRecordRaw[], result: RouteRecordRaw[] = []) => {
-  arr.forEach((item) => {
-    result.push(item)
-    item.children && flatTree(item.children, result)
-  })
-  return result
+/** 搜索菜单并附带完整路径 */
+const filterMenu = (queryString: string, tree: RouteRecordRaw[], arr: RouteRecordRaw[] = [], path: string = "") => {
+  if (!tree.length) return []
+  for (const item of tree) {
+    if (Array.isArray(item.children) && item.children.length > 0) {
+      let fullPath: string
+      if (path.length === 0) {
+        fullPath = item.meta?.title ? item.meta?.title : ""
+      } else {
+        fullPath = path + "/" + item.meta?.title
+      }
+      filterMenu(queryString, item.children, arr, fullPath)
+    } else {
+      if (keyword.value && item.meta?.title?.toLocaleLowerCase().includes(keyword.value.toLocaleLowerCase().trim())) {
+        item.meta.lablePath = path
+        arr.push(item)
+      }
+    }
+  }
+  return arr
 }
 
 /** 关闭搜索对话框 */

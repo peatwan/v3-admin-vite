@@ -91,6 +91,7 @@ defineExpose({ getScrollTop })
       <span class="result-item-title">
         {{ item.meta?.title }}
       </span>
+      <span class="result-item-path">{{ item.meta?.lablePath ? `(${item.meta?.lablePath})` : "" }}</span>
       <SvgIcon v-if="activeRouteName && activeRouteName === item.name" name="keyboard-enter" />
     </div>
   </div>
@@ -115,8 +116,13 @@ defineExpose({ getScrollTop })
     font-size: 18px;
   }
   &-title {
-    flex: 1;
+    // flex: 1;
     margin-left: 12px;
+    font-weight: bolder;
+  }
+  &-path {
+    margin-left: 5px;
+    font-size: small;
   }
 }
 </style>
