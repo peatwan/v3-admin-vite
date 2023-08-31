@@ -8,7 +8,7 @@ module.exports = {
       [
         "feat", // 增加新的业务功能
         "fix", //  修复业务问题/BUG
-        "pref", // 优化性能
+        "perf", // 优化性能
         "style", // 更改代码风格, 不影响运行结果
         "refactor", // 重构代码
         "revert", // 撤销更改
